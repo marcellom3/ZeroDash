@@ -5,7 +5,7 @@ Mostra CPU, GPU, **FPS**, memória, armazenamento, ventoinhas e placa-mãe em um
 
 > **Versão atual: 1.0.0** · Windows 10/11 x64 · feito para rodar **somente no monitor secundário ZeroMOD**
 
-<!-- Adicione um print em docs/screenshots/ e referencie aqui: ![ZeroDash](docs/screenshots/zerodash.png) -->
+![ZeroDash](docs/screenshots/zerodash.png)
 
 ## Sumário
 [Recursos](#recursos) · [Como funciona](#como-funciona) · [Requisitos](#requisitos) · [Compilar](#compilar) · [Executar e autostart](#executar-e-autostart) · [Monitor ZeroMOD](#rodando-exclusivamente-no-monitor-zeromod-1920x480) · [Layouts](#layouts) · [Adaptar ao seu hardware](#adaptar-ao-seu-hardware) · [Desempenho](#desempenho) · [Problemas comuns](#problemas-comuns) · [FAQ](#faq) · [Estrutura](#estrutura-do-repositório) · [Versionamento](#versionamento) · [Créditos](#licença-e-créditos)
