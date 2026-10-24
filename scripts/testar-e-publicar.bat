@@ -9,7 +9,7 @@ where git >nul 2>&1 || ( echo [ERRO] Git nao encontrado. Instale: https://git-sc
 where dotnet >nul 2>&1 || ( echo [ERRO] .NET 8 SDK nao encontrado. Instale: https://dotnet.microsoft.com/download/dotnet/8.0 & goto :fim )
 
 echo.
-echo [1/5] Preparando o repositorio Git (branch dev)...
+echo [1/6] Preparando o repositorio Git (branch dev)...
 if not exist ".git" (
   git init -b dev || goto :erro
   git remote add origin %REPO% || goto :erro
@@ -27,14 +27,14 @@ git checkout dev >nul 2>&1
 
 for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "([xml](Get-Content 'src\ZeroDash\ZeroDash.csproj')).Project.PropertyGroup.Version | Select-Object -First 1"`) do set "VER=%%v"
 echo.
-echo [2/5] Compilando a versao %VER%...
+echo [2/6] Compilando a versao %VER%...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build.ps1"
 if errorlevel 1 goto :erro
-set "EXE=%CD%\dist\ZeroDash-v%VER%\ZeroDash.exe"
+set "EXE=%CD%\dist\ZeroDash\ZeroDash.exe"
 if not exist "%EXE%" ( echo [ERRO] Executavel nao encontrado: %EXE% & goto :erro )
 
 echo.
-echo [3/5] Abrindo o ZeroDash (confirme o UAC). Teste no ZeroMOD: skins, bandeja, FPS...
+echo [3/6] Abrindo o ZeroDash (confirme o UAC). Teste no ZeroMOD: skins, bandeja, FPS...
 start "" "%EXE%"
 echo.
 echo Arquivos que serao enviados:
@@ -44,17 +44,35 @@ choice /c SN /n /m "Funcionou? Fazer commit e push para a dev (S/N)? "
 if errorlevel 2 ( echo Nada foi enviado. & goto :fim )
 
 echo.
-echo [4/5] Commit e push para a dev...
+echo [4/6] Commit e push para a dev...
 git add -A || goto :erro
 git diff --cached --quiet || git commit -m "feat: skins e novo layout completo (v%VER%)" || goto :erro
 git push -u origin dev || goto :erro
 
 echo.
-echo [5/5] Pull Request dev para main
+echo [5/6] Pull Request dev para main
 choice /c SN /n /m "Abrir a pagina do Pull Request no navegador (S/N)? "
 if errorlevel 2 goto :fim
 start "" "%PRURL%"
 echo Na pagina: confira os arquivos, clique em "Create pull request" e depois em "Merge pull request".
+
+echo.
+echo [6/6] Tag v%VER% na main
+choice /c SN /n /m "O Pull Request ja foi mergeado na main? Criar a tag v%VER% (S/N)? "
+if errorlevel 2 ( echo Tag nao criada. Rode este .bat de novo depois do merge. & goto :fim )
+git fetch origin --tags --force || goto :erro
+git diff --quiet origin/main origin/dev || ( echo [AVISO] A main ainda nao tem o mesmo conteudo da dev. Conclua o merge e rode de novo. & goto :fim )
+git ls-remote --exit-code --tags origin refs/tags/v%VER% >nul 2>&1
+if not errorlevel 1 (
+  echo A tag v%VER% ja existe no GitHub.
+  choice /c SN /n /m "Mover a tag v%VER% para o commit atual da main (S/N)? "
+  if errorlevel 2 goto :fim
+  git push origin :refs/tags/v%VER% || goto :erro
+  git tag -d v%VER% >nul 2>&1
+)
+git tag -a v%VER% -m "ZeroDash v%VER%" origin/main || goto :erro
+git push origin v%VER% || goto :erro
+echo Tag v%VER% enviada. O GitHub Actions vai gerar a release com o .zip.
 goto :fim
 
 :erro

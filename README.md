@@ -50,10 +50,10 @@ No PowerShell, na raiz do repositório:
 ```
 > **Erro de "política de execução" / "arquivo não assinado"?** Libere só a janela atual: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` e `Get-ChildItem -Recurse .\scripts | Unblock-File`. Ou rode: `powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1`.
 
-O resultado fica em `dist\ZeroDash-v1.0.1\` (`ZeroDash.exe`). O repositório também tem um workflow do GitHub Actions (`.github/workflows/build.yml`) que compila a cada push e publica um `.zip` na release ao criar uma tag `v*`.
+O resultado fica sempre em `dist\ZeroDash\` (`ZeroDash.exe`), uma **pasta fixa, sem a versão no nome**, para o caminho do "Iniciar com Windows" não quebrar a cada atualização. O repositório também tem um workflow do GitHub Actions (`.github/workflows/build.yml`) que compila a cada push e publica um `.zip` na release ao criar uma tag `v*`.
 
 ## Executar e autostart
-1. Feche o app se já estiver aberto e rode `dist\ZeroDash-v1.0.1\ZeroDash.exe` (confirma o UAC). A janela aparece no ZeroMOD e o ícone vai para a bandeja, perto do relógio.
+1. Feche o app se já estiver aberto e rode `dist\ZeroDash\ZeroDash.exe` (confirma o UAC). A janela aparece no ZeroMOD e o ícone vai para a bandeja, perto do relógio.
 2. **Clique direito no ícone da bandeja:**
    - **ZeroDash v1.0.1**: nome e versão (apenas informativo);
    - **Iniciar com Windows**: marcado = inicia sozinho 10 s após o logon, como administrador e sem UAC (cria/remove a tarefa agendada `ZeroDash`); desmarcado = não inicia;
@@ -140,7 +140,7 @@ ZeroDash/
 O `zerodash.ico` foi gerado a partir de `assets/icons/zerodash.png` (tamanhos 16 a 128 px).
 
 ## Fluxo de desenvolvimento
-Branches: `dev` (trabalho) e `main` (estável; só recebe Pull Requests vindos da `dev`). No Windows, `scripts\testar-e-publicar.bat` faz o fluxo inteiro: prepara o Git, compila, abre o app para teste e, **só se você confirmar**, faz o commit e o push para a `dev`, e abre a página do Pull Request `dev → main`. Precisa de Git e .NET 8 SDK instalados.
+Branches: `dev` (trabalho) e `main` (estável; só recebe Pull Requests vindos da `dev`). No Windows, `scripts\testar-e-publicar.bat` faz o fluxo inteiro: prepara o Git, compila, abre o app para teste e, **só se você confirmar**, faz o commit e o push para a `dev`, abre a página do Pull Request `dev → main` e, depois do merge, cria e envia a tag da versão (`v<versão>`), que dispara a release com o `.zip` no GitHub. Precisa de Git e .NET 8 SDK instalados.
 
 ## Versionamento
 [SemVer](https://semver.org/lang/pt-BR/). A versão fica em `<Version>` no `ZeroDash.csproj` e aparece no tooltip da bandeja. Para lançar: atualize o `.csproj` e o `CHANGELOG.md`, faça o commit e crie a tag:
