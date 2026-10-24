@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>ZeroDash</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#050505;--pn:#0e0e0e;--ln:#242424;--tx:#f4f4f5;--mu:#8b8b93}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;color:var(--tx);cursor:none}
+#st{position:absolute;left:0;top:0;width:1920px;height:480px;transform-origin:0 0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:262px 1fr;gap:14px;padding:14px;background:var(--bg)}
+.p{background:var(--pn);border:1px solid var(--ln);border-radius:16px;padding:14px 22px;position:relative;overflow:hidden}
+.p.b{padding:10px 20px}
+h2{margin:0;font-size:28px;line-height:1.1;font-weight:600;letter-spacing:-.3px}
+.sub{font-size:16px;color:var(--mu);margin-top:2px}
+.r{display:grid;grid-template-columns:1fr auto;align-items:end;margin-top:6px;font-size:17px;color:var(--mu)}
+.r b{color:var(--tx);font-weight:600;font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.bar{grid-column:1/3;height:4px;margin-top:5px;background:#1a1a1a;border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#34d39988,#60a5facc,#c084fcdd);transform-origin:0 0;transform:scaleX(0);transition:transform .45s}
+.body{display:flex;gap:22px;height:calc(100% - 50px)}.col{flex:1}
+.ring{width:140px;height:140px;flex:none;margin-top:20px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:7;stroke-linecap:round}
+.ring .bg{stroke:#1f1f1f}.ring .fg{stroke:#e8e8e8;stroke-dasharray:339.3;stroke-dashoffset:339.3;transition:stroke-dashoffset .5s,stroke .5s}
+.ring span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:58px;font-weight:600;line-height:1}
+.ring small{font-size:15px;color:var(--mu);font-weight:500}
+#fps{display:inline-block;font-size:110px;font-weight:600;line-height:.9;letter-spacing:-3px}
+.fpsbox{width:290px;flex:none;margin-top:6px}
+.fpsbox small{margin-left:8px;font-size:20px;color:var(--mu);font-weight:500}
+canvas{width:290px;height:70px;display:block;margin-top:6px;border-bottom:1px solid var(--ln)}
+.fan{display:flex;align-items:center;gap:14px;margin-top:3px;font-size:18px}.fan+.bar{height:3px}
+.fan svg{width:28px;height:28px;flex:none}.fan g{fill:#cfcfd4;opacity:.8;animation:spin 1s linear infinite}
+.fan .n{width:150px;font-weight:600}.fan b{width:150px;font-weight:600;font-size:26px;line-height:1.1}.fan em{color:var(--mu);font-style:normal}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dk{width:330px;margin-top:8px;font-size:19px}.dk div{display:flex;justify-content:space-between}.dk b{font-weight:600;font-size:26px}.dk span{color:var(--mu);font-size:16px}
+#clk{position:absolute;right:20px;bottom:8px;font-size:88px;font-weight:600;letter-spacing:-2px;line-height:1}
+#dt{position:absolute;right:24px;top:10px;font-size:34px;color:var(--mu)}
+#off{position:absolute;right:16px;top:8px;width:10px;height:10px;border-radius:5px;background:#f87171;display:none}
+</style></head><body>
+<div id="st">
+ <section class="p"><h2>Dados da CPU</h2><div class="sub">Ryzen 7 7800X3D</div>
+  <div class="body"><div class="ring"><svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" id="cT" cx="60" cy="60" r="54"/></svg><span><i id="cTn" style="font-style:normal">--</i><small>°C</small></span></div>
+  <div class="col" id="cpu"></div></div></section>
+ <section class="p"><h2>Dados da GPU</h2><div class="sub">GeForce RTX 5070 Ti</div>
+  <div class="body"><div class="fpsbox"><div id="fps">0</div><small>FPS</small><canvas id="cv" width="580" height="140"></canvas></div><div class="col" id="gpu"></div></div></section>
+ <section class="p"><h2>DDR5-5600</h2><div class="sub">Kingston Fury Beast</div><div id="ram"></div></section>
+ <section class="p b"><h2 style="font-size:26px">Armazenamento</h2><div class="dk" id="dk"></div><div id="clk">--:--</div><div id="dt"></div></section>
+ <section class="p b"><h2 style="font-size:26px">Ventoinhas</h2><div id="fans"></div></section>
+ <section class="p b"><h2 style="font-size:30px">MSI MAG B850</h2><div class="sub" id="bd">Tomahawk Max WiFi</div>
+  <div class="r"><span>Versão da BIOS</span><b id="bios">--</b></div><div class="r"><span>Temperatura VRM</span><b id="vrm">--</b></div></section>
+</div><div id="off"></div>
+<script>
+const $=id=>document.getElementById(id),MOCK=/mock/.test(location.search);
+const row=(k,l)=>`<div class=r><span>${l}</span><b id=${k}>--</b><div class=bar><i id=${k}i></i></div></div>`;
+$('cpu').innerHTML=row('c1','Utilização')+row('c2','Temperatura')+row('c3','Boost clock')+row('c4','Voltagem');
+$('gpu').innerHTML=row('g1','Utilização')+row('g2','Temperatura')+row('g3','Boost clock')+row('g4','Voltagem');
+$('ram').innerHTML=row('m1','Uso da memória')+row('m2','Memória utilizada')+row('m3','Memória virtual');
+const blades='<svg viewBox="-20 -20 40 40"><g>'+[0,120,240].map(a=>`<path transform="rotate(${a})" d="M0 0C7-3 11-13 3-18C-4-11-4-4 0 0Z"/>`).join('')+'</g></svg>';
+$('fans').innerHTML=['f1:WC 360 mm','f2:Gabinete','f3:RTX 5070 Ti'].map(s=>{const[k,n]=s.split(':');return `<div class=fan>${blades}<span class=n>${n}</span><b id=${k}>--</b><em id=${k}p></em></div><div class=bar style="margin-top:2px"><i id=${k}i></i></div>`}).join('');
+const n0=(v,d=0)=>v==null?'--':(+v).toFixed(d);
+function set(k,t,p){$(k).textContent=t;$(k+'i').style.transform='scaleX('+Math.max(0,Math.min(1,(p||0)/100))+')'}
+const hist=Array(90).fill(0),cx=$('cv').getContext('2d');
+function graph(){const w=580,h=140,m=Math.max(60,...hist);cx.clearRect(0,0,w,h);cx.beginPath();hist.forEach((v,i)=>{const x=i*w/(hist.length-1),y=h-4-v/m*(h-12);i?cx.lineTo(x,y):cx.moveTo(x,y)});cx.strokeStyle='#e8e8e8';cx.lineWidth=2;cx.stroke();cx.lineTo(w,h);cx.lineTo(0,h);cx.fillStyle='#ffffff14';cx.fill()}
+function render(r){const d=r.data;if(!d)return;
+ const t=d.cpu.temp;$('cTn').textContent=n0(t);const c=$('cT');c.style.strokeDashoffset=339.3*(1-Math.min(1,(t||0)/100));c.style.stroke=t>80?'#f87171':'#e8e8e8';
+ set('c1',n0(d.cpu.load)+'%',d.cpu.load);set('c2',n0(t)+' °C',t);set('c3',n0(d.cpu.clock)+' MHz',d.cpu.clock/55);set('c4',n0(d.cpu.volt,3)+' V',d.cpu.volt/1.5*100);
+ set('g1',n0(d.gpu.load)+'%',d.gpu.load);set('g2',n0(d.gpu.temp)+' °C',d.gpu.temp);set('g3',n0(d.gpu.clock)+' MHz',d.gpu.clock/30);set('g4',n0(d.gpu.volt,3)+' V',d.gpu.volt/1.2*100);
+ set('m1',n0(d.ram.pct)+'%',d.ram.pct);set('m2',n0(d.ram.usedMB)+' MB',d.ram.pct);set('m3',n0(d.virt.pct)+'%',d.virt.pct);
+ const f=r.fps||0;$('fps').textContent=Math.round(f);hist.push(f);hist.shift();graph();
+ [['f1',d.fans.pump],['f2',d.fans.case],['f3',d.fans.gpu]].forEach(([k,x])=>{set(k,n0(x.rpm)+' RPM',x.pct);$(k+'p').textContent=n0(x.pct)+'%';
+  const g=$(k).parentNode.querySelector('g');g.style.animationDuration=x.rpm>0?Math.max(.08,Math.min(3,3000/x.rpm/10))+'s':'0s';g.style.animationPlayState=x.rpm>0?'running':'paused'});
+ $('dk').innerHTML=d.disks.filter(k=>k.name[0]==='C').map(k=>`<div><b>${k.name}</b><b>Livre ${n0(k.freeGB)} GB</b></div><span>${k.label}</span><div class=bar style="margin:2px 0 6px"><i style="transform:scaleX(${k.totalGB?1-k.freeGB/k.totalGB:0})"></i></div>`).join('');
+ $('bios').textContent=d.bios||'--';$('vrm').textContent=n0(d.vrm)+' °C';
+}
+let mk={fps:140};
+function mock(){const j=(v,a,lo,hi)=>Math.max(lo,Math.min(hi,v+(Math.random()-.5)*a));mk.c=j(mk.c||47,6,35,85);mk.g=j(mk.g||60,8,0,100);mk.fps=j(mk.fps,20,60,240);
+ return{fps:mk.fps,data:{cpu:{load:mk.g/3,temp:mk.c,clock:4850,volt:1.0},gpu:{load:mk.g,temp:40+mk.g/3,clock:2737,volt:1.04},ram:{pct:75,usedMB:23989},virt:{pct:93},
+ fans:{pump:{rpm:4615,pct:84},case:{rpm:1775,pct:94},gpu:{rpm:mk.g>20?1800:0,pct:mk.g>20?50:0}},disks:[{name:'C:\\',label:'XPG SX8200 PRO NVME',freeGB:565,totalGB:2048}],bios:'2.A48',vrm:43.5}}}
+async function tick(){try{const r=MOCK?mock():await(await fetch('/api/metrics')).json();render(r);$('off').style.display='none'}catch(e){$('off').style.display='block'}}
+function fit(){$('st').style.transform='scale('+Math.min(innerWidth/1920,innerHeight/480)+')'}
+function clock(){const n=new Date();$('clk').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});$('dt').textContent=n.toLocaleDateString('pt-BR')}
+addEventListener('resize',fit);addEventListener('dblclick',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
+fit();clock();tick();setInterval(tick,500);setInterval(clock,10000);
+</script></body></html>

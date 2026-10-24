@@ -1,0 +1,18 @@
+# Build
+bin/
+obj/
+dist/
+publish/
+*.rar
+*.zip
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+# Logs e dados locais
+error.log
+*.log
+# Relatórios de sensores (contêm número de série da placa-mãe)
+LibreHardwareMonitor_Report*.txt
