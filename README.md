@@ -62,6 +62,10 @@ O resultado fica em `dist\ZeroDash-v1.0.1\` (`ZeroDash.exe`). O repositório tam
    - **Sair**: fecha o app.
 3. Se mover a pasta do executável, desmarque e marque **Iniciar com Windows** de novo para apontar para o novo local.
 
+Menu da bandeja (clique direito no ícone):
+
+![Menu da bandeja do ZeroDash](docs/screenshots/systray.png)
+
 ## Rodando exclusivamente no monitor ZeroMOD (1920x480)
 - O ZeroDash procura um monitor de **exatamente 1920x480** e posiciona a janela nele a cada 5 s. **Se não encontrar, a janela fica oculta** (nunca invade o monitor principal) e reaparece quando o ZeroMOD for conectado.
 - No Windows, deixe o ZeroMOD como **"Estender estas telas"** (não duplicar), **escala 100%**, e **não** como monitor principal.
