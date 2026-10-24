@@ -21,9 +21,10 @@ jobs:
       - name: Empacotar
         shell: pwsh
         run: |
-          $d = Get-ChildItem dist -Directory | Select-Object -First 1
-          Compress-Archive -Path "$($d.FullName)\*" -DestinationPath "$($d.Name).zip"
-          "ASSET=$($d.Name).zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+          [xml]$x = Get-Content src/ZeroDash/ZeroDash.csproj
+          $ver = @($x.Project.PropertyGroup.Version)[0]
+          Compress-Archive -Path "dist/ZeroDash/*" -DestinationPath "ZeroDash-v$ver.zip"
+          "ASSET=ZeroDash-v$ver.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ASSET }}
