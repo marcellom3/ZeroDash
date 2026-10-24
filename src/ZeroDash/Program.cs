@@ -20,6 +20,7 @@ const string PumpRpm = "/lpc/nct6687dr/0/fan/1", PumpPct = "/lpc/nct6687dr/0/con
 const string CaseRpm = "/lpc/nct6687dr/0/fan/10", CasePct = "/lpc/nct6687dr/0/control/10";
 const string GpuFanRpm = "/gpu-nvidia/0/fan/1", GpuFanPct = "/gpu-nvidia/0/control/1";
 const string Vrm = "/lpc/nct6687dr/0/temperature/2";
+const string CpuPower = "/amdcpu/0/power/0", GpuPower = "/gpu-nvidia/0/power/0";
 // ----------------------------------------------------------------------
 
 // Só o necessário: sem Storage/Memory(SPD)/Network, evita polling pesado de SMBus/SMART.
@@ -40,6 +41,23 @@ float? Boost() => sensors.Values.Where(s => s.SensorType == SensorType.Clock && 
 object? snap = null;
 string bios = Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\BIOS", "BIOSVersion", "")?.ToString() ?? "";
 string board = Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\BIOS", "BaseBoardProduct", "")?.ToString() ?? "";
+string Nm(HardwareType t) => Regex.Replace(pc.Hardware.FirstOrDefault(h => h.HardwareType == t)?.Name ?? "", @"\s+(\d+-Core )?Processor|^(AMD|NVIDIA) ", "");
+string cpuName = Nm(HardwareType.Cpu), gpuName = Nm(HardwareType.GpuNvidia);
+string os = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ProductName", "")?.ToString() ?? "Windows";
+if (int.TryParse(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentBuildNumber", "0")?.ToString(), out var bld) && bld >= 22000) os = os.Replace("Windows 10", "Windows 11");
+// Tipo e velocidade da RAM (SMBIOS via WMI, lido uma vez).
+(string, int) RamInfo()
+{
+    try
+    {
+        using var q = new System.Management.ManagementObjectSearcher("SELECT ConfiguredClockSpeed, SMBIOSMemoryType FROM Win32_PhysicalMemory");
+        int sp = 0, ty = 0;
+        foreach (System.Management.ManagementBaseObject o in q.Get()) { sp = Math.Max(sp, Convert.ToInt32(o["ConfiguredClockSpeed"] ?? 0)); ty = Convert.ToInt32(o["SMBIOSMemoryType"] ?? 0); }
+        return (ty == 34 ? "DDR5" : ty == 26 ? "DDR4" : ty == 24 ? "DDR3" : "RAM", sp);
+    }
+    catch { return ("RAM", 0); }
+}
+var ramInfo = RamInfo();
 
 object Build()
 {
@@ -48,12 +66,12 @@ object Build()
     var dk = drives.Select(d => { try { var i = new DriveInfo(d.Item1); return new { name = d.Item1 + ":\\", label = d.Item2, freeGB = i.AvailableFreeSpace / 1e9, totalGB = i.TotalSize / 1e9 }; } catch { return new { name = d.Item1 + ":\\", label = d.Item2, freeGB = 0.0, totalGB = 0.0 }; } });
     return new
     {
-        cpu = new { load = V(CpuLoad), temp = V(CpuTemp), clock = Boost(), volt = V(CpuVolt) },
-        gpu = new { load = V(GpuLoad), temp = V(GpuTemp), clock = V(GpuClock), volt = V(GpuVolt) },
-        ram = new { pct = usedP / m.TotP * 100, usedMB = usedP / 1048576 },
+        cpu = new { name = cpuName, load = V(CpuLoad), temp = V(CpuTemp), clock = Boost(), volt = V(CpuVolt), power = V(CpuPower) },
+        gpu = new { name = gpuName, load = V(GpuLoad), temp = V(GpuTemp), clock = V(GpuClock), volt = V(GpuVolt), power = V(GpuPower) },
+        ram = new { pct = usedP / m.TotP * 100, usedMB = usedP / 1048576, freeMB = m.AvP / 1048576.0, totalMB = m.TotP / 1048576.0, type = ramInfo.Item1, speed = ramInfo.Item2 },
         virt = new { pct = commit / m.TotPF * 100 },
         fans = new { pump = new { rpm = V(PumpRpm), pct = V(PumpPct) }, @case = new { rpm = V(CaseRpm), pct = V(CasePct) }, gpu = new { rpm = V(GpuFanRpm), pct = V(GpuFanPct) } },
-        disks = dk, board, bios, vrm = V(Vrm)
+        disks = dk, board, bios, vrm = V(Vrm), os, uptimeSec = Environment.TickCount64 / 1000
     };
 }
 
@@ -85,9 +103,7 @@ _ = Task.Run(async () => { var t = new PeriodicTimer(TimeSpan.FromMilliseconds(P
 var builder = WebApplication.CreateSlimBuilder();
 builder.WebHost.UseUrls(Url);
 var web = builder.Build();
-// Se existir wwwroot\index.html ao lado do exe, ele tem prioridade (editar layout sem recompilar); senão usa o embutido.
-string Html() { var f = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html"); if (File.Exists(f)) return File.ReadAllText(f); using var r = new StreamReader(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("index.html")!); return r.ReadToEnd(); }
-web.MapGet("/", (HttpContext c) => { c.Response.Headers.CacheControl = "no-store"; return Results.Text(Html(), "text/html; charset=utf-8"); });
+web.MapGet("/", (HttpContext c) => { c.Response.Headers.CacheControl = "no-store"; var id = c.Request.Query["skin"].ToString(); return Results.Text(Skins.Html(id == "" ? Skins.Current : id), "text/html; charset=utf-8"); });
 web.MapGet("/api/metrics", () => Results.Json(new { fps = Fps(), data = snap }));
 web.Start();
 var ui = new Thread(() => { Application.SetHighDpiMode(HighDpiMode.PerMonitorV2); Application.EnableVisualStyles(); Application.Run(new DashForm(Url)); });
@@ -143,9 +159,20 @@ class DashForm : Form
             if (!AutostartSet(want)) tray.ShowBalloonTip(4000, "ZeroDash", "Não foi possível alterar o início com o Windows.", ToolTipIcon.Warning);
             auto.Checked = AutostartOn();
         };
-        m.Opening += (_, _) => auto.Checked = AutostartOn();
+        var skinMenu = new ToolStripMenuItem("Skins");
+        m.Opening += (_, _) =>
+        {
+            auto.Checked = AutostartOn();
+            skinMenu.DropDownItems.Clear();
+            foreach (var (id, name) in Skins.List())
+            {
+                var it = new ToolStripMenuItem(name) { Checked = id == Skins.Current };
+                it.Click += (_, _) => { Skins.Set(id); wv.CoreWebView2?.Reload(); };
+                skinMenu.DropDownItems.Add(it);
+            }
+        };
         m.Items.AddRange(new ToolStripItem[] {
-            title, new ToolStripSeparator(), auto,
+            title, new ToolStripSeparator(), auto, skinMenu,
             new ToolStripMenuItem("Recarregar", null, (_, _) => wv.CoreWebView2?.Reload()),
             new ToolStripMenuItem("Sair", null, (_, _) => { tray.Visible = false; Application.Exit(); }) });
         tray.ContextMenuStrip = m;
@@ -167,4 +194,31 @@ class DashForm : Form
         if (!Visible) Show();
         if (Bounds != s.Bounds) Bounds = s.Bounds;
     }
+}
+
+// Skins: arquivos .html embutidos (src/ZeroDash/skins) + qualquer .html na pasta "skins" ao lado do exe (esta tem prioridade).
+static class Skins
+{
+    const string Default = "completo";
+    static readonly string Dir = Path.Combine(AppContext.BaseDirectory, "skins");
+    static readonly string Cfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZeroDash", "skin.txt");
+    public static string Current = Load();
+    static string Load() { try { var s = File.ReadAllText(Cfg).Trim(); if (List().Any(x => x.id == s)) return s; } catch { } return Default; }
+    public static void Set(string id) { Current = id; try { Directory.CreateDirectory(Path.GetDirectoryName(Cfg)!); File.WriteAllText(Cfg, id); } catch { } }
+    static string? Read(string id)
+    {
+        if (!Regex.IsMatch(id, "^[a-z0-9-]+$")) return null;
+        var f = Path.Combine(Dir, id + ".html");
+        if (File.Exists(f)) return File.ReadAllText(f);
+        using var r = typeof(Skins).Assembly.GetManifestResourceStream("skin." + id);
+        return r == null ? null : new StreamReader(r).ReadToEnd();
+    }
+    public static string Html(string id) => Read(id) ?? Read(Default) ?? "<h1>Skin não encontrada</h1>";
+    public static List<(string id, string name)> List()
+    {
+        var ids = typeof(Skins).Assembly.GetManifestResourceNames().Where(n => n.StartsWith("skin.")).Select(n => n[5..]).ToList();
+        if (Directory.Exists(Dir)) ids.AddRange(Directory.GetFiles(Dir, "*.html").Select(x => Path.GetFileNameWithoutExtension(x)));
+        return ids.Where(i => Regex.IsMatch(i, "^[a-z0-9-]+$")).Distinct().OrderBy(i => i).Select(i => (i, Name(i))).ToList();
+    }
+    static string Name(string id) { var m = Regex.Match(Read(id) ?? "", "name=\"skin-name\" content=\"([^\"]+)\""); return m.Success ? m.Groups[1].Value : id; }
 }

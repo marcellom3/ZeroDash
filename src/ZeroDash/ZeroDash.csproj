@@ -21,9 +21,9 @@
     <ApplicationIcon>zerodash.ico</ApplicationIcon>
 
     <!-- Versão única do projeto (SemVer). Atualize aqui e no CHANGELOG.md a cada release. -->
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <Product>ZeroDash</Product>
     <Description>Dashboard de hardware para o minimonitor ZeroMOD 1920x480</Description>
     <Copyright>Copyright (c) 2026 ZeroDash contributors</Copyright>
@@ -31,9 +31,7 @@
   <ItemGroup>
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.*" />
-    <EmbeddedResource Include="wwwroot\index.html" LogicalName="index.html" />
+    <EmbeddedResource Include="skins\*.html" LogicalName="skin.%(Filename)" />
     <EmbeddedResource Include="zerodash.ico" LogicalName="zerodash.ico" />
-    <!-- wwwroot só é embutido; não copiar para a saída (evita um index.html velho sobrepondo o novo). -->
-    <Content Update="wwwroot\**" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
   </ItemGroup>
 </Project>
