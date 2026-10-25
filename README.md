@@ -5,7 +5,7 @@ Mostra CPU, GPU, **FPS**, memória, armazenamento, ventoinhas e placa-mãe em um
 
 > **Versão atual: 1.0.2** · Windows 10/11 x64 · feito para rodar **somente no monitor secundário ZeroMOD**
 
-![ZeroDash](docs/screenshots/skin-completo.png)
+![ZeroDash - tema Âmbar](docs/screenshots/ambar.png)
 
 ## Sumário
 [Recursos](#recursos) · [Como funciona](#como-funciona) · [Requisitos](#requisitos) · [Compilar](#compilar) · [Executar e autostart](#executar-e-autostart) · [Monitor ZeroMOD](#rodando-exclusivamente-no-monitor-zeromod-1920x480) · [Temas](#temas) · [Adaptar ao seu hardware](#adaptar-ao-seu-hardware) · [Desempenho](#desempenho) · [Problemas comuns](#problemas-comuns) · [FAQ](#faq) · [Estrutura](#estrutura-do-repositório) · [Fluxo de desenvolvimento](#fluxo-de-desenvolvimento) · [Versionamento](#versionamento) · [Créditos](#licença-e-créditos)
@@ -74,6 +74,10 @@ Menu da bandeja (clique direito no ícone):
 
 ## Temas
 O layout é um só (o painel completo, em pt-BR). Os **temas** mudam apenas as cores, mantendo os degradês e efeitos. Troque em **clique direito na bandeja → Temas**; a escolha fica salva. Ordem no menu: **Âmbar** (padrão), **Ciano**, **Lima**, **Rosa** e **Turquesa**.
+
+| Âmbar (padrão) | Rosa |
+|:---:|:---:|
+| ![Tema Âmbar](docs/screenshots/ambar.png) | ![Tema Rosa](docs/screenshots/rosa.png) |
 
 - **Onde ficam:** um `.html` por tema em `src/ZeroDash/temas/` (embutidos no exe). Têm o mesmo desenho, mudando só a paleta.
 - **Adicionar sem recompilar:** crie a pasta `temas` ao lado do `ZeroDash.exe` e coloque ali um `.html`. Ele aparece no menu; se tiver o mesmo nome de um embutido, substitui o embutido. O nome exibido vem de `<meta name="tema-nome" content="Meu tema">`, e o arquivo deve usar só `a-z`, `0-9` e `-`.
