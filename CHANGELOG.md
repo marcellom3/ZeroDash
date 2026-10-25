@@ -2,16 +2,21 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.2] - 2026-10-25
+### Adicionado
+- Menu **Temas** na bandeja (antes "Skins"), com troca em tempo real e escolha salva: Âmbar (padrão), Ciano, Lima, Rosa e Turquesa. Temas extras podem ser colocados na pasta `temas` ao lado do exe.
+- O ícone (`.ico`) passa a ser gerado automaticamente a cada compilação a partir de `assets/icons/zerodash.png`.
+### Alterado
+- O painel completo é o único layout; as skins "Dourado [clássico]" e "Preto e Cinza [clássico]" e o tema Dourado provisório foram removidos. Os temas mudam apenas as cores, mantendo degradês e efeitos.
+
 ## [1.0.1] - 2026-10-25
 ### Adicionado
-- Menu **Skins** na bandeja (Dourado [completo], Dourado [clássico], Preto e Cinza [clássico]): troca de skin em tempo real, com a escolha salva; skins extras podem ser colocadas na pasta `skins` ao lado do exe.
-- Ícones (CPU, GPU, RAM e NVMe) nos cabeçalhos da skin Dourado [completo]; armazenamento com legendas Usado/Livre/Total.
-- Nova skin padrão **Dourado [completo]** em pt-BR, com 10 blocos e histórico de FPS com destaque para o valor em tempo real.
+- Painel completo em pt-BR (CPU, GPU, RAM, armazenamento, ventoinhas, data/hora, FPS, temperatura, energia e informações do sistema), com ícones nos cabeçalhos e legendas Usado/Livre/Total.
+- Menu **Skins** na bandeja, com troca em tempo real e escolha salva.
 - Novas métricas na API: potência da CPU e da GPU, nomes de CPU/GPU, RAM livre/total, tipo e velocidade da RAM, uptime e sistema operacional.
 ### Alterado
 - Pasta de saída da compilação fixa (`dist\ZeroDash`, sem a versão no nome), para o autostart não quebrar ao atualizar; o `.zip` da release continua levando a versão no nome.
 - Os layouts passaram a ser skins (`wwwroot/index.html` e `layouts/` foram substituídos por `src/ZeroDash/skins/`).
-- Tipo/velocidade da RAM via WMI (`System.Management`, já incluído pela LibreHardwareMonitorLib).
 
 ## [1.0.0] - 2026-10-24
 ### Adicionado
