@@ -1,23 +1,23 @@
 # ZeroDash
 
 Dashboard de hardware em tempo real para o minimonitor **ZeroMOD 1920x480 (60 Hz)**.
-Mostra CPU, GPU, **FPS**, memória, armazenamento, ventoinhas e placa-mãe em uma tela dedicada, com visual moderno (preto e dourado), baixo consumo e inicialização automática com o Windows.
+Mostra CPU, GPU, **FPS**, memória, armazenamento, ventoinhas e placa-mãe em uma tela dedicada, com visual moderno (fundo escuro e 5 temas de cor), baixo consumo e inicialização automática com o Windows.
 
-> **Versão atual: 1.0.1** · Windows 10/11 x64 · feito para rodar **somente no monitor secundário ZeroMOD**
+> **Versão atual: 1.0.2** · Windows 10/11 x64 · feito para rodar **somente no monitor secundário ZeroMOD**
 
 ![ZeroDash](docs/screenshots/skin-completo.png)
 
 ## Sumário
-[Recursos](#recursos) · [Como funciona](#como-funciona) · [Requisitos](#requisitos) · [Compilar](#compilar) · [Executar e autostart](#executar-e-autostart) · [Monitor ZeroMOD](#rodando-exclusivamente-no-monitor-zeromod-1920x480) · [Skins](#skins) · [Adaptar ao seu hardware](#adaptar-ao-seu-hardware) · [Desempenho](#desempenho) · [Problemas comuns](#problemas-comuns) · [FAQ](#faq) · [Estrutura](#estrutura-do-repositório) · [Fluxo de desenvolvimento](#fluxo-de-desenvolvimento) · [Versionamento](#versionamento) · [Créditos](#licença-e-créditos)
+[Recursos](#recursos) · [Como funciona](#como-funciona) · [Requisitos](#requisitos) · [Compilar](#compilar) · [Executar e autostart](#executar-e-autostart) · [Monitor ZeroMOD](#rodando-exclusivamente-no-monitor-zeromod-1920x480) · [Temas](#temas) · [Adaptar ao seu hardware](#adaptar-ao-seu-hardware) · [Desempenho](#desempenho) · [Problemas comuns](#problemas-comuns) · [FAQ](#faq) · [Estrutura](#estrutura-do-repositório) · [Fluxo de desenvolvimento](#fluxo-de-desenvolvimento) · [Versionamento](#versionamento) · [Créditos](#licença-e-créditos)
 
 ## Recursos
 - **CPU** (uso, temperatura, clock, potência, voltagem), **GPU** (uso, temperatura, clock, potência, voltagem, fan), **memória** (uso, usada, livre, virtual, tipo e velocidade), **ventoinhas** (RPM e %), **armazenamento** (usado, total e %), e **sistema** (placa-mãe, BIOS, uptime, Windows); nomes de CPU, GPU e placa-mãe lidos automaticamente.
 - **FPS** do jogo em execução, com histórico de 60 s (via RTSS).
 - Histórico de carga de CPU, GPU e RAM, gráfico de FPS com o valor em destaque, consumo de energia (CPU + GPU, estimado) e relógio com data.
 - Janela **sem borda**, encaixada sozinha no monitor 1920x480; se ele não estiver ligado, a janela **não aparece** no monitor principal.
-- Ícone na **bandeja do sistema** com menu (clique direito): nome/versão, **Iniciar com Windows** (liga/desliga), **Skins**, Recarregar e Sair. Instância única e `error.log` para falhas.
-- **Skins** (temas/layouts) trocáveis pelo menu da bandeja, sem reiniciar; skins novas podem ser soltas numa pasta, sem recompilar.
-- Um único `ZeroDash.exe` com as skins embutidas.
+- Ícone na **bandeja do sistema** com menu (clique direito): nome/versão, **Iniciar com Windows** (liga/desliga), **Temas**, Recarregar e Sair. Instância única e `error.log` para falhas.
+- **Temas de cor** (Âmbar, Ciano, Lima, Rosa e Turquesa) trocáveis pelo menu da bandeja, sem reiniciar; temas novos podem ser soltos numa pasta, sem recompilar.
+- Um único `ZeroDash.exe` com os temas embutidos.
 
 ## Como funciona
 ```
@@ -55,9 +55,9 @@ O resultado fica sempre em `dist\ZeroDash\` (`ZeroDash.exe`), uma **pasta fixa, 
 ## Executar e autostart
 1. Feche o app se já estiver aberto e rode `dist\ZeroDash\ZeroDash.exe` (confirma o UAC). A janela aparece no ZeroMOD e o ícone vai para a bandeja, perto do relógio.
 2. **Clique direito no ícone da bandeja:**
-   - **ZeroDash v1.0.1**: nome e versão (apenas informativo);
+   - **ZeroDash v1.0.2**: nome e versão (apenas informativo);
    - **Iniciar com Windows**: marcado = inicia sozinho 10 s após o logon, como administrador e sem UAC (cria/remove a tarefa agendada `ZeroDash`); desmarcado = não inicia;
-   - **Skins**: lista as skins (Dourado [completo], Dourado [clássico], Preto e Cinza [clássico]) e troca na hora; a escolha fica salva;
+   - **Temas**: Âmbar, Ciano, Lima, Rosa e Turquesa; troca na hora e a escolha fica salva;
    - **Recarregar**: recarrega a interface;
    - **Sair**: fecha o app.
 3. Se mover a pasta do executável, desmarque e marque **Iniciar com Windows** de novo para apontar para o novo local.
@@ -72,27 +72,12 @@ Menu da bandeja (clique direito no ícone):
 - O layout é fixo em 1920x480 e escala para outros tamanhos apenas ao abrir a URL no navegador.
 - Opcional: ligar o ZeroMOD na saída de vídeo da **placa-mãe** (iGPU) deixa a GPU dedicada só para o jogo. Veja o [FAQ](#faq).
 
-## Skins
-Uma skin é um arquivo `.html` que lê `/api/metrics`. Três vêm embutidas, nesta ordem no menu **Skins** da bandeja:
+## Temas
+O layout é um só (o painel completo, em pt-BR). Os **temas** mudam apenas as cores, mantendo os degradês e efeitos. Troque em **clique direito na bandeja → Temas**; a escolha fica salva. Ordem no menu: **Âmbar** (padrão), **Ciano**, **Lima**, **Rosa** e **Turquesa**.
 
-### Dourado [completo] (padrão)
-`skins/completo.html` · 10 blocos: CPU, GPU, RAM, armazenamento, ventoinhas, data, hora, FPS, temperatura, energia e informações do sistema.
-
-![Dourado completo](docs/screenshots/skin-completo.png)
-
-### Dourado [clássico]
-`skins/dourado.html` · Layout da v1.0, com 6 cards no topo.
-
-![Dourado clássico](docs/screenshots/skin-dourado-classico.png)
-
-### Preto e Cinza [clássico]
-`skins/preto-cinza.html` · Variante sem dourado.
-
-![Preto e Cinza clássico](docs/screenshots/skin-preto-cinza-classico.png)
-
-- **Trocar:** clique direito na bandeja → **Skins**.
-- **Adicionar sem recompilar:** crie a pasta `skins` ao lado do `ZeroDash.exe` e coloque ali um `.html`. Ele aparece no menu (e, se tiver o mesmo nome de uma embutida, substitui a embutida). O nome exibido vem de `<meta name="skin-name" content="Meu tema">`; o arquivo deve usar só `a-z`, `0-9` e `-`.
-- **Pré-visualizar no navegador:** `http://127.0.0.1:5173/?skin=completo` (com o app rodando) ou abra o HTML com `?mock` para dados simulados.
+- **Onde ficam:** um `.html` por tema em `src/ZeroDash/temas/` (embutidos no exe). Têm o mesmo desenho, mudando só a paleta.
+- **Adicionar sem recompilar:** crie a pasta `temas` ao lado do `ZeroDash.exe` e coloque ali um `.html`. Ele aparece no menu; se tiver o mesmo nome de um embutido, substitui o embutido. O nome exibido vem de `<meta name="tema-nome" content="Meu tema">`, e o arquivo deve usar só `a-z`, `0-9` e `-`.
+- **Pré-visualizar no navegador:** `http://127.0.0.1:5173/?tema=ciano` (com o app rodando) ou abra o HTML com `?mock` para dados simulados.
 - **Dados disponíveis** em `/api/metrics` → `{ fps, data }`, com `data.cpu/gpu {name, load, temp, clock, volt, power}`, `data.ram {pct, usedMB, freeMB, totalMB, type, speed}`, `data.virt.pct`, `data.fans.pump/case/gpu {rpm, pct}`, `data.disks[] {name, label, freeGB, totalGB}`, `data.board`, `data.bios`, `data.vrm`, `data.os`, `data.uptimeSec`.
 
 ## Adaptar ao seu hardware
@@ -129,15 +114,15 @@ Não: sensores, FPS e layout funcionam igual nos dois casos. É principalmente *
 ```
 ZeroDash/
 ├─ src/ZeroDash/          código-fonte (Program.cs, ZeroDash.csproj, app.manifest, zerodash.ico)
-│  └─ skins/              skins embutidas (.html)
+│  └─ temas/              temas de cor embutidos (.html)
 ├─ assets/icons/          ícone original (PNG 128x128)
-├─ scripts/               build.ps1, testar-e-publicar.bat
+├─ scripts/               build.ps1, gerar-icone.ps1, testar-e-publicar.bat
 ├─ docs/screenshots/      prints para o README
 ├─ .github/workflows/     build automático (GitHub Actions)
 ├─ CHANGELOG.md · LICENSE · .gitignore · .gitattributes
 └─ dist/                  saída da compilação (ignorada pelo git)
 ```
-O `zerodash.ico` foi gerado a partir de `assets/icons/zerodash.png` (tamanhos 16 a 128 px).
+O `zerodash.ico` é **gerado automaticamente** de `assets/icons/zerodash.png` a cada compilação (`scripts/gerar-icone.ps1`, tamanhos de 16 a 256 px, conforme o tamanho do PNG). Para trocar o ícone do app, da bandeja e do executável, basta substituir esse PNG.
 
 ## Fluxo de desenvolvimento
 Branches: `dev` (trabalho) e `main` (estável; só recebe Pull Requests vindos da `dev`). No Windows, `scripts\testar-e-publicar.bat` faz o fluxo inteiro: prepara o Git, compila, abre o app para teste e, **só se você confirmar**, faz o commit e o push para a `dev`, abre a página do Pull Request `dev → main` e, depois do merge, cria e envia a tag da versão (`v<versão>`), que dispara a release com o `.zip` no GitHub. Precisa de Git e .NET 8 SDK instalados.
@@ -145,7 +130,7 @@ Branches: `dev` (trabalho) e `main` (estável; só recebe Pull Requests vindos d
 ## Versionamento
 [SemVer](https://semver.org/lang/pt-BR/). A versão fica em `<Version>` no `ZeroDash.csproj` e aparece no tooltip da bandeja. Para lançar: atualize o `.csproj` e o `CHANGELOG.md`, faça o commit e crie a tag:
 ```powershell
-git tag v1.0.1; git push origin v1.0.1
+git tag v1.0.2; git push origin v1.0.2
 ```
 
 ## Licença e créditos

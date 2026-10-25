@@ -10,6 +10,7 @@ if (Get-Process ZeroDash -ErrorAction SilentlyContinue) {
     Write-Host "O ZeroDash está aberto. Feche-o (ícone da bandeja > Sair) e rode de novo." -ForegroundColor Yellow
     exit 1
 }
+& (Join-Path $PSScriptRoot "gerar-icone.ps1")   # assets\icons\zerodash.png -> src\ZeroDash\zerodash.ico
 if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 dotnet publish $proj -c Release -o $out
 if ($LASTEXITCODE -ne 0) { Write-Host "Falha na compilação." -ForegroundColor Red; exit $LASTEXITCODE }

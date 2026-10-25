@@ -103,7 +103,7 @@ _ = Task.Run(async () => { var t = new PeriodicTimer(TimeSpan.FromMilliseconds(P
 var builder = WebApplication.CreateSlimBuilder();
 builder.WebHost.UseUrls(Url);
 var web = builder.Build();
-web.MapGet("/", (HttpContext c) => { c.Response.Headers.CacheControl = "no-store"; var id = c.Request.Query["skin"].ToString(); return Results.Text(Skins.Html(id == "" ? Skins.Current : id), "text/html; charset=utf-8"); });
+web.MapGet("/", (HttpContext c) => { c.Response.Headers.CacheControl = "no-store"; var id = c.Request.Query["tema"].ToString(); return Results.Text(Temas.Html(id == "" ? Temas.Current : id), "text/html; charset=utf-8"); });
 web.MapGet("/api/metrics", () => Results.Json(new { fps = Fps(), data = snap }));
 web.Start();
 var ui = new Thread(() => { Application.SetHighDpiMode(HighDpiMode.PerMonitorV2); Application.EnableVisualStyles(); Application.Run(new DashForm(Url)); });
@@ -159,20 +159,20 @@ class DashForm : Form
             if (!AutostartSet(want)) tray.ShowBalloonTip(4000, "ZeroDash", "Não foi possível alterar o início com o Windows.", ToolTipIcon.Warning);
             auto.Checked = AutostartOn();
         };
-        var skinMenu = new ToolStripMenuItem("Skins");
+        var temaMenu = new ToolStripMenuItem("Temas");
         m.Opening += (_, _) =>
         {
             auto.Checked = AutostartOn();
-            skinMenu.DropDownItems.Clear();
-            foreach (var (id, name) in Skins.List())
+            temaMenu.DropDownItems.Clear();
+            foreach (var (id, name) in Temas.List())
             {
-                var it = new ToolStripMenuItem(name) { Checked = id == Skins.Current };
-                it.Click += (_, _) => { Skins.Set(id); wv.CoreWebView2?.Reload(); };
-                skinMenu.DropDownItems.Add(it);
+                var it = new ToolStripMenuItem(name) { Checked = id == Temas.Current };
+                it.Click += (_, _) => { Temas.Set(id); wv.CoreWebView2?.Reload(); };
+                temaMenu.DropDownItems.Add(it);
             }
         };
         m.Items.AddRange(new ToolStripItem[] {
-            title, new ToolStripSeparator(), auto, skinMenu,
+            title, new ToolStripSeparator(), auto, temaMenu,
             new ToolStripMenuItem("Recarregar", null, (_, _) => wv.CoreWebView2?.Reload()),
             new ToolStripMenuItem("Sair", null, (_, _) => { tray.Visible = false; Application.Exit(); }) });
         tray.ContextMenuStrip = m;
@@ -196,12 +196,12 @@ class DashForm : Form
     }
 }
 
-// Skins: arquivos .html embutidos (src/ZeroDash/skins) + qualquer .html na pasta "skins" ao lado do exe (esta tem prioridade).
-static class Skins
+// Temas: arquivos .html embutidos (src/ZeroDash/temas) + qualquer .html na pasta "temas" ao lado do exe (esta tem prioridade).
+static class Temas
 {
-    const string Default = "completo";
-    static readonly string Dir = Path.Combine(AppContext.BaseDirectory, "skins");
-    static readonly string Cfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZeroDash", "skin.txt");
+    const string Default = "ambar";
+    static readonly string Dir = Path.Combine(AppContext.BaseDirectory, "temas");
+    static readonly string Cfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZeroDash", "tema.txt");
     public static string Current = Load();
     static string Load() { try { var s = File.ReadAllText(Cfg).Trim(); if (List().Any(x => x.id == s)) return s; } catch { } return Default; }
     public static void Set(string id) { Current = id; try { Directory.CreateDirectory(Path.GetDirectoryName(Cfg)!); File.WriteAllText(Cfg, id); } catch { } }
@@ -210,15 +210,15 @@ static class Skins
         if (!Regex.IsMatch(id, "^[a-z0-9-]+$")) return null;
         var f = Path.Combine(Dir, id + ".html");
         if (File.Exists(f)) return File.ReadAllText(f);
-        using var r = typeof(Skins).Assembly.GetManifestResourceStream("skin." + id);
+        using var r = typeof(Temas).Assembly.GetManifestResourceStream("tema." + id);
         return r == null ? null : new StreamReader(r).ReadToEnd();
     }
-    public static string Html(string id) => Read(id) ?? Read(Default) ?? "<h1>Skin não encontrada</h1>";
+    public static string Html(string id) => Read(id) ?? Read(Default) ?? "<h1>Tema não encontrado</h1>";
     public static List<(string id, string name)> List()
     {
-        var ids = typeof(Skins).Assembly.GetManifestResourceNames().Where(n => n.StartsWith("skin.")).Select(n => n[5..]).ToList();
+        var ids = typeof(Temas).Assembly.GetManifestResourceNames().Where(n => n.StartsWith("tema.")).Select(n => n[5..]).ToList();
         if (Directory.Exists(Dir)) ids.AddRange(Directory.GetFiles(Dir, "*.html").Select(x => Path.GetFileNameWithoutExtension(x)));
         return ids.Where(i => Regex.IsMatch(i, "^[a-z0-9-]+$")).Distinct().OrderBy(i => i).Select(i => (i, Name(i))).ToList();
     }
-    static string Name(string id) { var m = Regex.Match(Read(id) ?? "", "name=\"skin-name\" content=\"([^\"]+)\""); return m.Success ? m.Groups[1].Value : id; }
+    static string Name(string id) { var m = Regex.Match(Read(id) ?? "", "name=\"tema-nome\" content=\"([^\"]+)\""); return m.Success ? m.Groups[1].Value : id; }
 }

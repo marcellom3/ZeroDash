@@ -24,6 +24,8 @@ if errorlevel 1 (
   git checkout -- docs/screenshots >nul 2>&1
 )
 git checkout dev >nul 2>&1
+if exist "src\ZeroDash\skins" rmdir /s /q "src\ZeroDash\skins"
+if exist "src\ZeroDash\temas\dourado.html" del /q "src\ZeroDash\temas\dourado.html"
 
 for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "([xml](Get-Content 'src\ZeroDash\ZeroDash.csproj')).Project.PropertyGroup.Version | Select-Object -First 1"`) do set "VER=%%v"
 echo.
@@ -34,7 +36,7 @@ set "EXE=%CD%\dist\ZeroDash\ZeroDash.exe"
 if not exist "%EXE%" ( echo [ERRO] Executavel nao encontrado: %EXE% & goto :erro )
 
 echo.
-echo [3/6] Abrindo o ZeroDash (confirme o UAC). Teste no ZeroMOD: skins, bandeja, FPS...
+echo [3/6] Abrindo o ZeroDash (confirme o UAC). Teste no ZeroMOD: temas, bandeja, FPS...
 start "" "%EXE%"
 echo.
 echo Arquivos que serao enviados:
@@ -46,7 +48,7 @@ if errorlevel 2 ( echo Nada foi enviado. & goto :fim )
 echo.
 echo [4/6] Commit e push para a dev...
 git add -A || goto :erro
-git diff --cached --quiet || git commit -m "feat: skins e novo layout completo (v%VER%)" || goto :erro
+git diff --cached --quiet || git commit -m "feat: temas de cor, novo icone e layout completo (v%VER%)" || goto :erro
 git push -u origin dev || goto :erro
 
 echo.
